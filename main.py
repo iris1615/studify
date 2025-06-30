@@ -50,12 +50,19 @@ def get_songs_by_artist(token, artist_id):
     json_result = json.loads(result.content)["tracks"]
     return json_result
 
+def get_my_top_tracks(token):
+    url = f"https://api.spotify.com/v1/me/top/tracks?time_range=long_term&limit=5"
+    headers = get_auth_header(token)
+    result = get(url, headers=headers)
+    json_result = json.loads(result.content)
+    return json_result
+
 token = get_token()
-#print(f"Token: {token}")
+print(get_my_top_tracks(token))
+'''
 response = search_for_artist(token, artist_name = "Ca7riel")
-#print(response["id"])
 artist_id = response["id"]
 songs = get_songs_by_artist(token, artist_id)
 for song in songs:
     print(f"Song: {song['name']}, Popularity: {song['popularity']}")
-#print(songs)
+'''
