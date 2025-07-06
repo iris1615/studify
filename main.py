@@ -2,7 +2,7 @@ import requests
 import urllib.parse
 import os
 
-from flask import Flask, redirect, jsonify, session, request
+from flask import Flask, redirect, jsonify, session, request, render_template
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
@@ -56,7 +56,7 @@ def callback():
         session['refresh_token'] = token_info['refresh_token'] # para dar refresh ao access token (apenas dura 1 dia)
         session['expires_at'] = datetime.now().timestamp() + token_info['expires_in'] # indica quanto tempo o access_token dura
         
-        return redirect('/top-artists') # vai retornar as playlists do user
+        return redirect('/top-tracks-from-top-artists') # vai retornar as playlists do user
 
 @app.route('/playlists')
 def get_playlists():
@@ -90,9 +90,39 @@ def get_topArtists():
     response = requests.get(API_BASE_URL + 'me/top/artists?time_range=short_term', headers=headers)
 
     top_artists = response.json()
-    artist_names = [artist['name'] for artist in top_artists['items']]
+    #artist_names = [artist['name'] for artist in top_artists['items']]
+    #artist_images = [artist['images'] for artist in top_artists['items']]
+    artists_data = []
+    for artist in top_artists['items']:
+        artist_info = {
+            'name': artist['name'],
+            'image_url': artist['images'][0]['url'] if artist['images'] else None,  # Primeira imagem (maior)
+            'popularity': artist['popularity'],
+            'followers': artist['followers']['total'],
+            'external_url': artist['external_urls']['spotify']
+        }
+        artists_data.append(artist_info)
+    
+    #return render_template('top-artists.html', artists=artists_data) #posso também alterar para thymeleaf
+    return jsonify(artists_data)
 
-    return jsonify(artist_names)
+@app.route('/top-tracks-from-top-artists')
+def getTopTracksFromTopArtists():
+    if 'access_token' not in session:
+        return redirect('/login')
+    if datetime.now().timestamp() > session['expires_at']:
+        print("TOKEN EXPIRED,, REFRESHING..")
+        return redirect('/refresh-token')
+
+    headers = {
+        'Authorization': f"Bearer {session['access_token']}"
+    }
+    response = requests.get(API_BASE_URL + 'me/top/tracks?time_range=short_term', headers=headers)
+    top_tracks = response.json()
+
+    return jsonify(top_tracks)
+
+
 
 @app.route('/refresh-token')
 def refresh_token():
@@ -113,7 +143,7 @@ def refresh_token():
         session['access_token'] = new_token_info['access_token']
         session['expires_at'] = datetime.now().timestamp() + new_token_info['expires_in'] 
 
-        return redirect('/top-artists')
+        return redirect('/top-tracks-from-top-artists')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug= True)
