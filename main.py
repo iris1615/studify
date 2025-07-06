@@ -22,7 +22,7 @@ def index():
 
 @app.route('/login')
 def login():
-    scope = 'user-read-private user-read-email'
+    scope = 'user-read-private user-read-email user-top-read' # para acedermos aos top-artists precisamos da permissão 'user-top-read'
 
     params = {
         'client_id': CLIENT_ID,
@@ -56,7 +56,7 @@ def callback():
         session['refresh_token'] = token_info['refresh_token'] # para dar refresh ao access token (apenas dura 1 dia)
         session['expires_at'] = datetime.now().timestamp() + token_info['expires_in'] # indica quanto tempo o access_token dura
         
-        return redirect('/playlists') # vai retornar as playlists do user
+        return redirect('/top-artists') # vai retornar as playlists do user
 
 @app.route('/playlists')
 def get_playlists():
@@ -72,7 +72,27 @@ def get_playlists():
     response = requests.get(API_BASE_URL + 'me/playlists', headers=headers)
     playlists = response.json()
 
-    return jsonify(playlists)
+    playlist_names = [playlist['name'] for playlist in playlists['items']]
+
+    return jsonify(playlist_names)
+
+@app.route('/top-artists')
+def get_topArtists():
+    if 'access_token' not in session:
+        return redirect('/login')
+    if datetime.now().timestamp() > session['expires_at']:
+        print("TOKEN EXPIRED,, REFRESHING..")
+        return redirect('/refresh-token')
+
+    headers = {
+        'Authorization': f"Bearer {session['access_token']}"
+    }
+    response = requests.get(API_BASE_URL + 'me/top/artists?time_range=short_term', headers=headers)
+
+    top_artists = response.json()
+    artist_names = [artist['name'] for artist in top_artists['items']]
+
+    return jsonify(artist_names)
 
 @app.route('/refresh-token')
 def refresh_token():
@@ -93,7 +113,7 @@ def refresh_token():
         session['access_token'] = new_token_info['access_token']
         session['expires_at'] = datetime.now().timestamp() + new_token_info['expires_in'] 
 
-        return redirect('/playlists')
+        return redirect('/top-artists')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug= True)
