@@ -21,7 +21,9 @@
                 {% endif %}
                 <div class="artist-name">{{ artist.name }}</div>
                 
+                {% if artist.genres %}
                 <div class="artist-genres">{{ artist.genres }}</div>
+                {% endif %}
                 
                 <div class="artist-stats">
                     <p>Popularidade: {{ artist.popularity }}/100</p>

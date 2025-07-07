@@ -103,7 +103,7 @@ def get_topArtists():
             'followers': artist['followers']['total'],
             'external_url': artist['external_urls']['spotify'],
             'tracks': [],
-            'genres': artist['genres']
+            'genres': artist['genres'] # TODO: no caso de não ter genre vamos fazer uma in terpolação baseada nos genres dos seus related artists, def get_related_artists
         }
         
         for track in top_tracks_info:
