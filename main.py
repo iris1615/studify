@@ -56,7 +56,7 @@ def callback():
         session['refresh_token'] = token_info['refresh_token'] # para dar refresh ao access token (apenas dura 1 dia)
         session['expires_at'] = datetime.now().timestamp() + token_info['expires_in'] # indica quanto tempo o access_token dura
         
-        return redirect('/top-tracks-from-top-artists') # vai retornar as playlists do user
+        return redirect('/top-artists') # vai retornar as playlists do user
 
 @app.route('/playlists')
 def get_playlists():
@@ -93,20 +93,28 @@ def get_topArtists():
     #artist_names = [artist['name'] for artist in top_artists['items']]
     #artist_images = [artist['images'] for artist in top_artists['items']]
     artists_data = []
+    top_tracks_info = getTopTracksFromTopArtists()
+    
     for artist in top_artists['items']:
         artist_info = {
             'name': artist['name'],
             'image_url': artist['images'][0]['url'] if artist['images'] else None,  # Primeira imagem (maior)
             'popularity': artist['popularity'],
             'followers': artist['followers']['total'],
-            'external_url': artist['external_urls']['spotify']
+            'external_url': artist['external_urls']['spotify'],
+            'tracks': []
         }
+        
+        for track in top_tracks_info:
+            if track['artist'] == artist_info['name']:
+                artist_info['tracks'].append(track['name'])
+
         artists_data.append(artist_info)
     
-    #return render_template('top-artists.html', artists=artists_data) #posso também alterar para thymeleaf
-    return jsonify(artists_data)
+    return render_template('top-artists.html', artists=artists_data) #posso também alterar para thymeleaf
+    #return jsonify(artists_data)
 
-@app.route('/top-tracks-from-top-artists')
+#@app.route('/top-tracks-from-top-artists')
 def getTopTracksFromTopArtists():
     if 'access_token' not in session:
         return redirect('/login')
@@ -119,8 +127,15 @@ def getTopTracksFromTopArtists():
     }
     response = requests.get(API_BASE_URL + 'me/top/tracks?time_range=short_term', headers=headers)
     top_tracks = response.json()
+    top_tracks_info = []
+    for track in top_tracks['items']:
+        info = {'name': track['name'],
+        'artist': track['artists'][0]['name'] # artists é um array
+        }
+        top_tracks_info.append(info)
 
-    return jsonify(top_tracks)
+    #return jsonify(top_tracks_info)
+    return top_tracks_info
 
 
 
@@ -143,7 +158,7 @@ def refresh_token():
         session['access_token'] = new_token_info['access_token']
         session['expires_at'] = datetime.now().timestamp() + new_token_info['expires_in'] 
 
-        return redirect('/top-tracks-from-top-artists')
+        return redirect('/top-artists')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug= True)

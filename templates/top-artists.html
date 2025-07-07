@@ -24,6 +24,17 @@
                     <p>Popularidade: {{ artist.popularity }}/100</p>
                     <p>Seguidores: {{ "{:,}".format(artist.followers) }}</p>
                 </div>
+                {% if artist.tracks %}
+                <div class="artist-tracks">
+                    <h4>Top Tracks:</h4>
+                    <ul>
+                        {% for track in artist.tracks %}
+                        <li>{{ track }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
                 <a href="{{ artist.external_url }}" target="_blank" class="spotify-link">
                     Abrir no Spotify
                 </a>
