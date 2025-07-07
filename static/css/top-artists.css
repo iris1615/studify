@@ -16,7 +16,7 @@ body {
             margin-top: 20px;
         }
         .artist-card {
-            background-color: #1e1e1e;
+            /*background-color: #1e1e1e;*/
             border-radius: 10px;
             padding: 20px;
             text-align: center;
@@ -38,7 +38,7 @@ body {
             margin-bottom: 10px;
         }
         .artist-stats {
-            color: #b3b3b3;
+            color: #ffffff;
             margin-bottom: 10px;
         }
         .spotify-link {

@@ -16,6 +16,42 @@ AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
 API_BASE_URL = 'https://api.spotify.com/v1/'
 
+spotify_genres = {
+    1: {"genre": "pop",        "color": "#FFB3BA"},
+    2: {"genre": "hip hop",    "color": "#FFDFBA"},
+    3: {"genre": "rock",       "color": "#BAE1FF"},
+    4: {"genre": "rap",        "color": "#D5AAFF"},
+    5: {"genre": "indie",      "color": "#C2F0C2"},
+    6: {"genre": "dance",      "color": "#FFFACD"},
+    7: {"genre": "edm",        "color": "#C9E4DE"},
+    8: {"genre": "r&b",        "color": "#DCC6E0"},
+    9: {"genre": "soul",       "color": "#FFD6E0"},
+    10: {"genre": "jazz",      "color": "#BFD8B8"},
+    11: {"genre": "blues",     "color": "#A3C4F3"},
+    12: {"genre": "country",   "color": "#FEE1E8"},
+    13: {"genre": "classical", "color": "#EAD7D1"},
+    14: {"genre": "reggae",    "color": "#C5FAD5"},
+    15: {"genre": "latin",     "color": "#FAD6A5"},
+    16: {"genre": "k-pop",     "color": "#FFCCE5"},
+    17: {"genre": "metal",     "color": "#DAD4EF"},
+    18: {"genre": "punk",      "color": "#F7C8E0"},
+    19: {"genre": "japanese",      "color": "#E6DDC4"},
+    20: {"genre": "funk",      "color": "#FFDEA9"},
+    21: {"genre": "house",     "color": "#A0E7E5"},
+    22: {"genre": "techno",    "color": "#D0C4DF"},
+    23: {"genre": "soundtrack",    "color": "#D0F4DE"},
+    24: {"genre": "dubstep",   "color": "#E2CFEA"},
+    25: {"genre": "hyperpop",   "color": "#DEFDE0"},
+    26: {"genre": "argentine",     "color": "#C3FBD8"},
+    27: {"genre": "afrobeats", "color": "#FFE0AC"},
+    28: {"genre": "portuguese","color": "#CDE7BE"},
+    29: {"genre": "disco",     "color": "#FFF5BA"},
+    30: {"genre": "alternative","color": "#D6E2E9"}
+}
+
+
+
+
 @app.route('/')
 def index():
     return "Welcome to my spotify app !! <a href='/login'>Login with spotify</a>"
@@ -103,14 +139,38 @@ def get_topArtists():
             'followers': artist['followers']['total'],
             'external_url': artist['external_urls']['spotify'],
             'tracks': [],
-            'genres': artist['genres'] # TODO: no caso de não ter genre vamos fazer uma in terpolação baseada nos genres dos seus related artists, def get_related_artists
+            'genres': artist['genres'], # TODO: no caso de não ter genre vamos fazer uma in terpolação baseada nos genres dos seus related artists, def get_related_artists
             # a interpolação baseada nos géneros dos related-artists não é possível com a api do spotify :(
+            'color': "#8D99AE"
         }
         
         for track in top_tracks_info:
             if track['artist'] == artist_info['name']:
                 artist_info['tracks'].append(track['name'])
 
+        if artist['genres'] and len(artist['genres']) > 0:
+            # Procurar uma cor baseada nos géneros do artista
+            artist_color = "#8D99AE"  # Cor padrão (alternative)
+            
+            for genre in artist['genres']:
+                # Dividir géneros compostos (ex: "indie rock" -> ["indie", "rock"])
+                genre_words = genre.lower().split()
+                
+                # Procurar cada palavra nos nossos géneros definidos
+                for word in genre_words:
+                    for genre_info in spotify_genres.values():
+                        if word == genre_info["genre"]:
+                            artist_color = genre_info["color"]
+                            break
+                    if artist_color != "#8D99AE":  # Se já encontrou uma cor, parar
+                        break
+                if artist_color != "#8D99AE":  # Se já encontrou uma cor, parar
+                    break
+            
+            artist_info['color'] = artist_color
+        else:
+            # Se não tem géneros, usar cor padrão
+            artist_info['color'] = "#8D99AE"
         artists_data.append(artist_info)
     
     return render_template('top-artists.html', artists=artists_data) #posso também alterar para thymeleaf
@@ -139,7 +199,7 @@ def getTopTracksFromTopArtists():
     #return jsonify(top_tracks_info)
     return top_tracks_info
 
-
+'''
 @app.route('/top-tracks')
 def get_topTracks():
     if 'access_token' not in session:
@@ -154,7 +214,7 @@ def get_topTracks():
     response = requests.get(API_BASE_URL + 'me/top/artists?time_range=short_term', headers=headers)
     top_tracks = response.json()
     return jsonify(top_tracks)
-
+'''
 
 @app.route('/refresh-token')
 def refresh_token():
