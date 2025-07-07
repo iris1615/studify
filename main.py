@@ -104,6 +104,7 @@ def get_topArtists():
             'external_url': artist['external_urls']['spotify'],
             'tracks': [],
             'genres': artist['genres'] # TODO: no caso de não ter genre vamos fazer uma in terpolação baseada nos genres dos seus related artists, def get_related_artists
+            # a interpolação baseada nos géneros dos related-artists não é possível com a api do spotify :(
         }
         
         for track in top_tracks_info:
