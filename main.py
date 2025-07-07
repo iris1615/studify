@@ -102,7 +102,8 @@ def get_topArtists():
             'popularity': artist['popularity'],
             'followers': artist['followers']['total'],
             'external_url': artist['external_urls']['spotify'],
-            'tracks': []
+            'tracks': [],
+            'genres': artist['genres']
         }
         
         for track in top_tracks_info:
@@ -137,6 +138,21 @@ def getTopTracksFromTopArtists():
     #return jsonify(top_tracks_info)
     return top_tracks_info
 
+
+@app.route('/top-tracks')
+def get_topTracks():
+    if 'access_token' not in session:
+        return redirect('/login')
+    if datetime.now().timestamp() > session['expires_at']:
+        print("TOKEN EXPIRED,, REFRESHING..")
+        return redirect('/refresh-token')
+
+    headers = {
+        'Authorization': f"Bearer {session['access_token']}"
+    }
+    response = requests.get(API_BASE_URL + 'me/top/artists?time_range=short_term', headers=headers)
+    top_tracks = response.json()
+    return jsonify(top_tracks)
 
 
 @app.route('/refresh-token')

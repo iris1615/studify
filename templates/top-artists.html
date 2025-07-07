@@ -20,6 +20,9 @@
                 </div>
                 {% endif %}
                 <div class="artist-name">{{ artist.name }}</div>
+                
+                <div class="artist-genres">{{ artist.genres }}</div>
+                
                 <div class="artist-stats">
                     <p>Popularidade: {{ artist.popularity }}/100</p>
                     <p>Seguidores: {{ "{:,}".format(artist.followers) }}</p>
@@ -34,7 +37,7 @@
                     </ul>
                 </div>
                 {% endif %}
-                
+
                 <a href="{{ artist.external_url }}" target="_blank" class="spotify-link">
                     Abrir no Spotify
                 </a>
