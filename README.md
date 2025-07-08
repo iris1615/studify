@@ -19,6 +19,8 @@ The app displays your top artists in a beautiful grid layout with:
 - Top tracks from each artist
 - Direct links to open artists in Spotify
 
+![App Preview](screenshots/studifyArtistCards.png)
+
 ## Prerequisites
 
 Before running this application, you need:
