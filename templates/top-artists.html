@@ -27,8 +27,11 @@
                 {% endif %}
                 
                 <div class="artist-stats">
-                    <p>Popularidade: {{ artist.popularity }}/100</p>
-                    <p>Seguidores: {{ "{:,}".format(artist.followers) }}</p>
+                    <p>Play Count: {{ artist.playcount }}</p>
+                    <!-- Remove followers, popularity (Spotify-specific) -->
+                    {% if artist.listeners %}
+                    <p>Listeners: {{ artist.listeners }}</p>
+                    {% endif %}
                 </div>
                 {% if artist.tracks %}
                 <div class="artist-tracks">
@@ -41,9 +44,7 @@
                 </div>
                 {% endif %}
 
-                <a href="{{ artist.external_url }}" target="_blank" class="spotify-link">
-                    Abrir no Spotify
-                </a>
+                <a href="{{ artist.url }}" target="_blank" class="lastfm-link">View on Last.fm</a>
             </div>
             {% endfor %}
         </div>
